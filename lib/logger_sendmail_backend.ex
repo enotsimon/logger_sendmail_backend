@@ -32,11 +32,11 @@ defmodule LoggerSendmailBackend do
   def handle_info({:flush_aggregated, iuid}, %{uid: uid, messages: messages} = state) when iuid == uid and messages != [] do
     install_new_timer(uid, state.aggregate_time)
     count_messages = length(messages)
-    prefix = case count_messages > @msg_limit do
-      true -> "#{@msg_limit} of total #{count_messages} messages\n"
+    prefix = case count_messages > state.msg_limit do
+      true -> "#{state.msg_limit} of total #{count_messages} messages\n"
       false -> "total #{count_messages} messages\n"
     end
-    body = prefix <> (messages |> Enum.reverse |> Enum.take(@msg_limit) |> Enum.join(""))
+    body = prefix <> (messages |> Enum.reverse |> Enum.take(state.msg_limit) |> Enum.join(""))
     send_email(body, state)
     {:ok, %{state | messages: []}}
   end
