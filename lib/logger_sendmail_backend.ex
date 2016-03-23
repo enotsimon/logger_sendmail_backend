@@ -30,7 +30,7 @@ defmodule LoggerSendmailBackend do
 
 
   def handle_info({:flush_aggregated, iuid}, %{uid: uid, messages: messages} = state) when iuid == uid and messages != [] do
-    install_new_timer(uid)
+    install_new_timer(uid, state.aggregate_time)
     count_messages = length(messages)
     prefix = case count_messages > @msg_limit do
       true -> "#{@msg_limit} of total #{count_messages} messages\n"
@@ -42,7 +42,7 @@ defmodule LoggerSendmailBackend do
   end
 
   def handle_info({:flush_aggregated, _iuid}, state) do
-    install_new_timer(state.uid)
+    install_new_timer(state.uid, state.aggregate_time)
     {:ok, state}
   end
 
@@ -66,7 +66,7 @@ defmodule LoggerSendmailBackend do
     Application.put_env(:logger, __MODULE__, config)
 
     uid = :os.timestamp()
-    install_new_timer(uid)
+    install_new_timer(uid, Keyword.get(config, :aggregate_time, @aggregate_time))
 
     to = Keyword.get(config, :to)
     if !is_list(to) || to == [] do
@@ -85,7 +85,7 @@ defmodule LoggerSendmailBackend do
       msg_limit: Keyword.get(config, :msg_limit, @msg_limit)}
   end
 
-  defp install_new_timer(uid) do :erlang.send_after(@aggregate_time, self(), {:flush_aggregated, uid}) end
+  defp install_new_timer(uid, aggregate_time) do :erlang.send_after(aggregate_time, self(), {:flush_aggregated, uid}) end
 
 
 
