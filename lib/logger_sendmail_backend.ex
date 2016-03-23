@@ -1,8 +1,8 @@
 defmodule LoggerSendmailBackend do
   use GenEvent
 
-  @aggregate_time 5000
-  @msg_limit 20
+  @aggregate_time 5000 # default
+  @msg_limit 20 # default
 
   def init(__MODULE__) do
     {:ok, configure([])}
@@ -34,7 +34,7 @@ defmodule LoggerSendmailBackend do
     count_messages = length(messages)
     prefix = case count_messages > @msg_limit do
       true -> "#{@msg_limit} of total #{count_messages} messages\n"
-      false -> ""
+      false -> "total #{count_messages} messages\n"
     end
     body = prefix <> (messages |> Enum.reverse |> Enum.take(@msg_limit) |> Enum.join(""))
     send_email(body, state)
@@ -80,7 +80,9 @@ defmodule LoggerSendmailBackend do
       subject: Keyword.get(config, :subject, "errors in exilir application"),
       from: Keyword.get(config, :from, "#{__MODULE__}"),
       to: Keyword.get(config, :to),
-      uid: uid}
+      uid: uid,
+      aggregate_time: Keyword.get(config, :aggregate_time, @aggregate_time),
+      msg_limit: Keyword.get(config, :msg_limit, @msg_limit)}
   end
 
   defp install_new_timer(uid) do :erlang.send_after(@aggregate_time, self(), {:flush_aggregated, uid}) end
