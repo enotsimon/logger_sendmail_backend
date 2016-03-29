@@ -1,8 +1,12 @@
 defmodule LoggerSendmailBackend do
   use GenEvent
 
-  @aggregate_time 5000 # default
-  @msg_limit 20 # default
+  @moduledoc """
+  backend for Logger that sends letters thru sendmail
+  """
+
+  @aggregate_time 60000 # default 1 min
+  @msg_limit 20 # default messages limit in one letter. you dont want to read all 100500?
 
   def init(__MODULE__) do
     {:ok, configure([])}

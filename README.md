@@ -9,7 +9,7 @@ backend for Logger that sends letters thru sendmail
 
 add
 
-`{:logger_sendmail_backend, git: "ssh://git@stash.sj-dev.local:7999/search/logger_sendmail_backend.git", branch: "master"}`
+`{:logger_sendmail_backend, git: "https://github.com/skorobogatko/logger_sendmail_backend.git", branch: "master"}`
 
 to your `mix.exs` file in `deps()` section
 
@@ -25,9 +25,11 @@ config :logger,
 
 config :logger, LoggerSendmailBackend,
   level: :warn,
-  sendmail_command: "cat", # '/usr/sbin/sendmail -t' by default, no need to set it if you got it
-  subject: "elixir errors on node #{inspect node()}",
-  to: ["mail@example.com"],
-  from: "logger_sendmail_backend <another_mail@example.com>"
+  #sendmail_command: "cat", # '/usr/sbin/sendmail -t' by default, no need to set it if you got it
+  subject: "elixir errors in my <AppName>",
+  to: ["mail1@example.com", "mail2@example.com"],
+  from: "logger_sendmail_backend <another_mail@example.com>",
+  aggregate_time: 5*60000, # 5 min
+  msg_limit: 40 # 40 messages limit in one letter
 ```
 
