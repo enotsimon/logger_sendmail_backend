@@ -17,7 +17,7 @@ defmodule LoggerSendmailBackend do
   end
 
 
-  def handle_event({level, gl, event}, state) when node(gl) != node() do {:ok, state} end
+  def handle_event({_level, gl, _event}, state) when node(gl) != node() do {:ok, state} end
 
   def handle_event({level, _gl, {Logger, message, {{y, m, d}, {h, mi, s, _}}, meta}}, state) do
     if meet_level?(level, state.level) do
