@@ -9,7 +9,7 @@ backend for Logger that sends letters thru sendmail
 
 add
 
-`{:logger_sendmail_backend, git: "https://github.com/skorobogatko/logger_sendmail_backend.git", branch: "master"}`
+`{:logger_sendmail_backend, git: "https://github.com/enotsimon/logger_sendmail_backend.git", branch: "master"}`
 
 to your `mix.exs` file in `deps()` section
 
