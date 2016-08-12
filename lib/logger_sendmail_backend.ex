@@ -31,6 +31,10 @@ defmodule LoggerSendmailBackend do
     {:ok, state}
   end
 
+  def handle_event(:flush,  %{uid: uid} = state) do
+    handle_info({:flush_aggregated, uid}, state)
+  end
+
 
 
   def handle_info({:flush_aggregated, iuid}, %{uid: uid, messages: messages} = state) when iuid == uid and messages != [] do
