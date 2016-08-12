@@ -60,6 +60,10 @@ defmodule LoggerSendmailBackend do
     {:ok, state}
   end
 
+  def handle_info({:io_reply, _replyAs, _reply}, state) do
+    {:ok, state}
+  end
+
 
 
 
