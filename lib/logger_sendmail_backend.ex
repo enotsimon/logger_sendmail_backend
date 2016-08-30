@@ -20,11 +20,13 @@ defmodule LoggerSendmailBackend do
   def handle_event({_level, gl, _event}, state) when node(gl) != node() do {:ok, state} end
 
   def handle_event({level, _gl, {Logger, message, {{y, m, d}, {h, mi, s, _}}, meta}}, state) do
+    {:ok, host} = :inet.gethostname()
     if meet_level?(level, state.level) do
       message = "
         time: #{d}.#{m}.#{y} #{h}:#{mi}:#{s}, pid: #{inspect meta[:pid]}, level: #{level}
         module: #{inspect meta[:module]}, function: #{inspect meta[:function]}, line: #{inspect meta[:line]}
         message: #{message}
+        host: #{inspect host}
       "
       state = %{state | messages: [message | state.messages]}
     end
