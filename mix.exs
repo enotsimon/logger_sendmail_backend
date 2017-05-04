@@ -9,8 +9,8 @@ defmodule LoggerSendmailBackend.Mixfile do
       version: @version,
       elixir: "~> 1.0",
       description: "backend for Logger that sends letters thru sendmail",
-      deps: deps,
-      package: package
+      deps: deps(),
+      package: package()
     ]
   end
 
