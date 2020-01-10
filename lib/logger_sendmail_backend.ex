@@ -1,5 +1,5 @@
 defmodule LoggerSendmailBackend do
-  use GenEvent
+  @behaviour :gen_event
 
   @moduledoc """
   backend for Logger that sends letters thru sendmail
