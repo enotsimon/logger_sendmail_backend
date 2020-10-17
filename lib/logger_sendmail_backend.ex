@@ -1,5 +1,5 @@
 defmodule LoggerSendmailBackend do
-  use GenEvent
+  @behaviour :gen_event
 
   @moduledoc """
   backend for Logger that sends letters thru sendmail
@@ -22,13 +22,17 @@ defmodule LoggerSendmailBackend do
   def handle_event({level, _gl, {Logger, message, {{y, m, d}, {h, mi, s, _}}, meta}}, state) do
     {:ok, host} = :inet.gethostname()
     state = if meet_level?(level, state.level) do
-      message = "
-        time: #{d}.#{m}.#{y} #{h}:#{mi}:#{s}, pid: #{inspect meta[:pid]}, level: #{level}
-        module: #{inspect meta[:module]}, function: #{inspect meta[:function]}, line: #{inspect meta[:line]}
-        message: #{message}
-        host: #{inspect host}
-      "
-      %{state | messages: [message | state.messages]}
+      if is_ignored?("#{message}", state.ignore_regex) do
+        state
+      else
+        message = "
+          time: #{d}.#{m}.#{y} #{h}:#{mi}:#{s}, pid: #{inspect meta[:pid]}, level: #{level}
+          module: #{inspect meta[:module]}, function: #{inspect meta[:function]}, line: #{inspect meta[:line]}
+          message: #{message}
+          host: #{inspect host}
+        "
+        %{state | messages: [message | state.messages]}
+      end
     else
       state
     end
@@ -75,6 +79,13 @@ defmodule LoggerSendmailBackend do
     Logger.compare_levels(lvl, min) != :lt
   end
 
+  defp is_ignored?(_message, nil) do
+    false
+  end
+  defp is_ignored?(message, regex) do
+    String.match?(message, regex)
+  end
+
   defp configure(opts) do
     config =
       Application.get_env(:logger, __MODULE__, [])
@@ -89,6 +100,11 @@ defmodule LoggerSendmailBackend do
       throw "error init #{__MODULE__}. param :to is empty. set it in config!"
     end
 
+    ignore_regex = Keyword.get(config, :ignore_regex)
+    if ignore_regex != nil && !Regex.regex?(ignore_regex) do
+      throw "error in #{__MODULE__} configuration: parameter :ignore_regex must be a regular expression"
+    end
+
     %{level: Keyword.get(config, :level, :error),
       metadata: Keyword.get(config, :metadata, []),
       messages: [],
@@ -96,6 +112,7 @@ defmodule LoggerSendmailBackend do
       subject: Keyword.get(config, :subject, "errors in exilir application"),
       from: Keyword.get(config, :from, "#{__MODULE__}"),
       to: Keyword.get(config, :to),
+      ignore_regex: ignore_regex,
       uid: uid,
       aggregate_time: Keyword.get(config, :aggregate_time, @aggregate_time),
       msg_limit: Keyword.get(config, :msg_limit, @msg_limit)}
